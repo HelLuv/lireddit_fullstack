@@ -7,7 +7,7 @@ import {Field, Int, ObjectType} from "type-graphql";
 export class User {
   @Field(() => Int)
   @PrimaryKey()
-  id!: number;
+  id!: string;
 
   @Field(() => String)
   @Property({type: 'date', onUpdate: () => new Date()})
@@ -20,7 +20,7 @@ export class User {
   @Field()
   @Property({type: 'text', unique: true})
   username!: string;
-  
+
   @Property({type: 'text'})
   password!: string;
 

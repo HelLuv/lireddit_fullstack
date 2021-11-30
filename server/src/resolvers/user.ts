@@ -1,4 +1,4 @@
-import {Arg, Ctx, Field, InputType, Mutation, ObjectType, Resolver} from "type-graphql";
+import {Arg, Ctx, Mutation, Query, Resolver} from "type-graphql";
 import {MyContext} from "../types";
 import {User} from "../entities/User";
 import argon2 from "argon2";
@@ -7,10 +7,22 @@ import {validateRegister} from "../utils/validateRegister";
 
 @Resolver()
 export class UserResolver {
+
+  @Query(() => User, {nullable: true})
+  async me(@Ctx() {res, req, em}: MyContext): Promise<User | null> {
+    console.log(req.session)
+    if (!req.session.userId) {
+      return null;
+    }
+
+    return await em.findOne(User, {id: req.session.userId})
+  }
+
+
   @Mutation(() => UserResponse)
   async userRegister(
     @Arg('input') input: UsernamePasswordInput,
-    @Ctx() {em}: MyContext
+    @Ctx() {em, req}: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(input);
     if (errors) {
@@ -26,19 +38,20 @@ export class UserResolver {
     try {
       await em.persistAndFlush(user);
     } catch (err) {
-      //|| err.detail.includes("already exists")) {
-      // duplicate username error
       if (err.code === "23505") {
         return {
           errors: [
             {
               field: "username",
-              message: "username already taken",
+              message: "User already exist",
             },
           ],
         };
       }
     }
+
+
+    req.session.userId = user.id;
 
     return {user};
   }
@@ -46,7 +59,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async userLogin(
     @Arg('input') input: UsernamePasswordInput,
-    @Ctx() {em}: MyContext
+    @Ctx() {em, req}: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, {username: input.username});
     if (!user) {
@@ -63,10 +76,15 @@ export class UserResolver {
       return {
         errors: [{
           field: 'password',
-          message: "incorrect password"
+          message: "Invalid password"
         }]
       }
     }
+
+    await em.persistAndFlush(user);
+
+    req.session.userId = '' + user.id;
+
     return {user};
   }
 }
