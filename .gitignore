@@ -14,7 +14,14 @@
 
 # misc
 .DS_Store
-npm-debug.log
 
 
 .idea
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+next
+.env

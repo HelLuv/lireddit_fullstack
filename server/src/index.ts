@@ -33,7 +33,7 @@ const main = async () => {
   app.set("trust proxy", 1);
   app.use(cors({
     credentials: true,
-    origin: ["http://localhost:4000", "https://studio.apollographql.com"],
+    origin: ["http://localhost:4000", "https://studio.apollographql.com", "http://localhost:3000"],
   }));
 
   app.use(
