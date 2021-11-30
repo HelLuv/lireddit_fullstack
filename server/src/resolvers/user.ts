@@ -9,7 +9,8 @@ import {validateRegister} from "../utils/validateRegister";
 export class UserResolver {
 
   @Query(() => User, {nullable: true})
-  async me(@Ctx() {res, req, em, userId}: MyContext): Promise<User | null> {
+  async me(@Ctx() {res, req, em}: MyContext): Promise<User | null> {
+    console.log(req.session)
     if (!req.session.userId) {
       return null;
     }
@@ -21,7 +22,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async userRegister(
     @Arg('input') input: UsernamePasswordInput,
-    @Ctx() {em}: MyContext
+    @Ctx() {em, req}: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(input);
     if (errors) {
@@ -37,8 +38,6 @@ export class UserResolver {
     try {
       await em.persistAndFlush(user);
     } catch (err) {
-      //|| err.detail.includes("already exists")) {
-      // duplicate username error
       if (err.code === "23505") {
         return {
           errors: [
@@ -50,6 +49,9 @@ export class UserResolver {
         };
       }
     }
+
+
+    req.session.userId = user.id;
 
     return {user};
   }

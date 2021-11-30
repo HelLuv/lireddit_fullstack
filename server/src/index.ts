@@ -30,12 +30,12 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redis = new Redis();
 
-
+  app.set("trust proxy", 1);
   app.use(cors({
     credentials: true,
     origin: ["http://localhost:4000", "https://studio.apollographql.com"],
   }));
-  app.set("trust proxy", 1);
+
   app.use(
     session({
       name: COOKIE_NAME,
@@ -46,9 +46,8 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years for store cookie
         httpOnly: true,
-        sameSite: 'lax', // csrf
+        sameSite: 'none',
         secure: true, // __prod__ // cookie only works in https,
-        domain: "http://localhost:4000"
       },
       saveUninitialized: false,
       secret: 'invwoupqpuiwbvpzxcnk',
