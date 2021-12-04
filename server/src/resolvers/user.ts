@@ -10,7 +10,6 @@ export class UserResolver {
 
   @Query(() => User, {nullable: true})
   async me(@Ctx() {res, req, em}: MyContext): Promise<User | null> {
-    console.log(req.session)
     if (!req.session.userId) {
       return null;
     }
@@ -51,7 +50,7 @@ export class UserResolver {
     }
 
 
-    req.session.userId = user.id;
+    req.session.userId = '' + user.id;
 
     return {user};
   }

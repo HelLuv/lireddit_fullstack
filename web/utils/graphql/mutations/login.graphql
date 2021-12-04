@@ -1,0 +1,12 @@
+mutation USER_LOGIN($input: UsernamePasswordInput!){
+    userLogin(input: $input){
+        user {
+            id
+            username
+        }
+        errors{
+            field
+            message
+        }
+    }
+}
