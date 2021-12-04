@@ -1,11 +1,15 @@
 import type {NextPage} from 'next'
 import * as React from 'react'
+import NavBar from './components/NavBar'
 
 const Index: NextPage = () => {
   return (
-    <div>
-      Sup
-    </div>
+    <>
+      <NavBar/>
+      <div>
+        Sup
+      </div>
+    </>
   )
 }
 
