@@ -9,5 +9,5 @@ export type MyContext = {
     session: Session & Partial<SessionData> & { userId: string };
   };
   res: Response;
-  redis: Redis
+  userId: string
 }

@@ -4,24 +4,38 @@ import {User} from "../entities/User";
 import argon2 from "argon2";
 import {UsernamePasswordInput, UserResponse} from "./types/user";
 import {validateRegister} from "../utils/validateRegister";
+import {COOKIE_NAME} from "../constants";
+import {sign} from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+import verifyJWT from "../utils/verify_JWT_token";
 
 @Resolver()
 export class UserResolver {
 
   @Query(() => User, {nullable: true})
-  async me(@Ctx() {res, req, em}: MyContext): Promise<User | null> {
-    if (!req.session.userId) {
-      return null;
+  async currentUser(@Ctx() {em, req}: MyContext): Promise<User | null> {
+    let token = req?.headers?.cookie?.split("=")[1];
+
+    let user = undefined;
+    if (token) {
+      const {sub}: any = jwt.verify(token, "keep_it_secret");
+      user = await em.findOne(User, {id: sub});
+    } else if (req?.headers?.authorization) {
+      let token = req?.headers?.authorization;
+      const {sub}: any = jwt.verify(token, "keep_it_secret");
+      user = await em.findOne(User, {id: sub});
+    } else {
+      user = null
     }
 
-    return await em.findOne(User, {id: req.session.userId})
+    return user;
   }
 
 
   @Mutation(() => UserResponse)
   async userRegister(
     @Arg('input') input: UsernamePasswordInput,
-    @Ctx() {em, req}: MyContext
+    @Ctx() {em, req, res}: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(input);
     if (errors) {
@@ -49,7 +63,7 @@ export class UserResolver {
       }
     }
 
-
+    res.setHeader("Set-Cookie", `${COOKIE_NAME}=${user.id}`)
     req.session.userId = '' + user.id;
 
     return {user};
@@ -58,7 +72,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async userLogin(
     @Arg('input') input: UsernamePasswordInput,
-    @Ctx() {em, req}: MyContext
+    @Ctx() {em, req, res}: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, {username: input.username});
     if (!user) {
@@ -81,6 +95,14 @@ export class UserResolver {
     }
 
     await em.persistAndFlush(user);
+
+    const token = sign({sub: user.id}, "keep_it_secret");
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // and won't be usable outside of my domain
+      maxAge: 1000 * 60 * 60 * 24, //10 years
+    });
+    res.setHeader("Authorization", `Bearer ${token}`);
 
     req.session.userId = '' + user.id;
 

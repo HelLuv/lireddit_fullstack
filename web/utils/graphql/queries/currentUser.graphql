@@ -1,0 +1,5 @@
+query CURRENT_USER {
+    currentUser {
+        ...RegularUser
+    }
+}

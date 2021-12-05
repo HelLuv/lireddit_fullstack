@@ -13,7 +13,8 @@ import session from "express-session";
 import connectRedis from 'connect-redis';
 import {MyContext} from "./types";
 import cors from "cors";
-
+import {ApolloServerPluginLandingPageGraphQLPlayground} from "apollo-server-core";
+import {getUserId} from './utils/setToken';
 
 declare module 'express-session' {
   interface Session {
@@ -55,21 +56,26 @@ const main = async () => {
     })
   );
 
-
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({req, res}): MyContext => ({em: orm.em, res, req, redis})
+    context: ({req, res}): MyContext => ({
+      em: orm.em,
+      res,
+      req,
+      userId: req && req.headers.cookie ? getUserId(req, res) : null,
+    }),
+    // plugins: [ApolloServerPluginLandingPageGraphQLPlayground({})]
   });
 
   await apolloServer.start();
-  apolloServer.applyMiddleware({app, path: "/", cors: false})
+  apolloServer.applyMiddleware({app, cors: false})
 
-  app.get('/', ((_, res) => {
-    res.send('hello');
-  }))
+  // app.get('/', ((_, res) => {
+  //   res.send('hello');
+  // }))
 
   app.listen(APP_PORT, () => {
     console.log(`server started at localhost:${APP_PORT} 💜`);

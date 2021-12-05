@@ -22,13 +22,14 @@ const Login: React.FC<LoginProps> = ({}) => {
   return (
     <Wrapper variant={'small'}>
       <Formik initialValues={{username: '', password: ''}} onSubmit={async (values, {setErrors}) => {
-        const response = await login({...values});
+        const response = await login({input: values})
+        ;
         if (response.data?.userLogin.errors) {
           setErrors(toErrorMap(response.data.userLogin.errors))
         } else if (response.data?.userLogin.user) {
           await router.push('/');
         }
-        return login({...values})
+        return login({input: values})
       }}>
         {({isSubmitting}) => (
           <Form>
