@@ -99,14 +99,22 @@ export class UserResolver {
     const token = sign({sub: user.id}, "keep_it_secret");
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // and won't be usable outside of my domain
-      maxAge: 1000 * 60 * 60 * 24, //10 years
+      secure: false,
+      maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
     });
     res.setHeader("Authorization", `Bearer ${token}`);
 
     req.session.userId = '' + user.id;
 
     return {user};
+  }
+
+  @Mutation(() => Boolean)
+  userLogout(
+    @Ctx() {res}: MyContext
+  ) {
+    res.clearCookie(COOKIE_NAME);
+    return true;
   }
 }
 
