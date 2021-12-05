@@ -1,8 +1,7 @@
 mutation USER_REGISTER($username: String!, $password: String!){
     userRegister(input: {username: $username, password: $password}){
         user {
-            id
-            username
+            ...RegularUser
         }
         errors{
             field

@@ -1,8 +1,7 @@
 mutation USER_LOGIN($input: UsernamePasswordInput!){
     userLogin(input: $input){
         user {
-            id
-            username
+            ...RegularUser
         }
         errors{
             field
