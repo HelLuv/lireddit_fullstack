@@ -1,11 +1,5 @@
-mutation USER_LOGIN($input: UsernamePasswordInput!){
-    userLogin(input: $input){
-        user {
-            ...RegularUser
-        }
-        errors{
-            field
-            message
-        }
+mutation USER_LOGIN($usernameOrEmail:String!, $password: String!){
+    userLogin(usernameOrEmail: $usernameOrEmail, password:$password ){
+        ...RegularUserResponse
     }
 }

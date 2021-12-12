@@ -6,9 +6,11 @@ import {
 import {Form, Formik} from 'formik';
 import Wrapper from "./components/Wrapper";
 import InputField from "./components/InputField";
-import {useUser_LoginMutation, useUser_RegisterMutation} from "../utils/generated/graphql";
+import {useUser_LoginMutation} from "../utils/generated/graphql";
 import toErrorMap from "../utils/services/toErrorMap";
 import {useRouter} from "next/router";
+import {withUrqlClient} from "next-urql";
+import createUrqlClient from "../utils/services/createUrqlClient";
 
 
 interface LoginProps {
@@ -21,22 +23,22 @@ const Login: React.FC<LoginProps> = ({}) => {
 
   return (
     <Wrapper variant={'small'}>
-      <Formik initialValues={{username: '', password: ''}} onSubmit={async (values, {setErrors}) => {
-        const response = await login({input: values})
-        ;
+      <Formik initialValues={{usernameOrEmail: '', password: ''}} onSubmit={async (values, {setErrors}) => {
+        const response = await login(values);
+
         if (response.data?.userLogin.errors) {
           setErrors(toErrorMap(response.data.userLogin.errors))
         } else if (response.data?.userLogin.user) {
           await router.push('/');
         }
-        return login({input: values})
+        return login(values)
       }}>
         {({isSubmitting}) => (
           <Form>
             <InputField
-              name={'username'}
-              placeholder={'Enter your username'}
-              label={'Username'}
+              name={'usernameOrEmail'}
+              placeholder={'Enter your username or email'}
+              label={'Username or email'}
               required={true}
             />
             <Box mt={4}>
@@ -56,4 +58,4 @@ const Login: React.FC<LoginProps> = ({}) => {
   )
 };
 
-export default React.memo(Login);
+export default withUrqlClient(createUrqlClient)(Login)

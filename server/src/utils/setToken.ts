@@ -8,11 +8,11 @@ function getTokenPayload(token: string) {
 }
 
 export function getUserId(req: Request, res: Response) {
+
   if (req) {
     const authHeader = req.headers.cookie;
     if (authHeader) {
       let token = req?.headers?.cookie?.split('=')[1]
-
       if (!token) {
         throw new Error('No token found');
       }

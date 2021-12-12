@@ -13,7 +13,6 @@ import session from "express-session";
 import connectRedis from 'connect-redis';
 import {MyContext} from "./types";
 import cors from "cors";
-import {ApolloServerPluginLandingPageGraphQLPlayground} from "apollo-server-core";
 import {getUserId} from './utils/setToken';
 
 declare module 'express-session' {
@@ -24,7 +23,6 @@ declare module 'express-session' {
 
 const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
-  // await orm.getMigrator().up();
 
   const app = express();
 
@@ -72,10 +70,6 @@ const main = async () => {
 
   await apolloServer.start();
   apolloServer.applyMiddleware({app, cors: false})
-
-  // app.get('/', ((_, res) => {
-  //   res.send('hello');
-  // }))
 
   app.listen(APP_PORT, () => {
     console.log(`server started at localhost:${APP_PORT} 💜`);

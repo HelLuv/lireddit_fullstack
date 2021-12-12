@@ -1,0 +1,8 @@
+query RETRIEVE_ALL_POSTS {
+    retrieveAllPosts {
+        id
+        title
+        createdAt
+        updateAt
+    }
+}
